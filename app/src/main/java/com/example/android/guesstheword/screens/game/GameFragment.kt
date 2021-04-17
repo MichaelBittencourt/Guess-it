@@ -62,17 +62,18 @@ class GameFragment : Fragment() {
             binding.wordText.text = it
         })
 
+        viewModel.eventGameFinished.observe(this, Observer {
+            if (it) {
+                gameFinished()
+                viewModel.onGameFinishComplete()
+            }
+        })
+
         binding.correctButton.setOnClickListener {
             viewModel.onCorrect()
-            if (viewModel.isFinish()) {
-                gameFinished()
-            }
         }
         binding.skipButton.setOnClickListener {
             viewModel.onSkip()
-            if (viewModel.isFinish()) {
-                gameFinished()
-            }
         }
         return binding.root
     }
