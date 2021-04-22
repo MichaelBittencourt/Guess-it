@@ -58,6 +58,8 @@ class ScoreFragment : Fragment() {
         viewModelFactory = ScoreViewModelFactory(scoreFragmentArgs.score)
         viewModel = ViewModelProvider(this, viewModelFactory).get(ScoreViewModel::class.java)
 
+        binding.scoreViewModel = viewModel
+
         viewModel.score.observe(this, Observer {
             binding.scoreText.text = viewModel.score.value.toString()
         })
@@ -69,12 +71,6 @@ class ScoreFragment : Fragment() {
             }
         })
 
-        binding.playAgainButton.setOnClickListener { onPlayAgain() }
-
         return binding.root
-    }
-
-    private fun onPlayAgain() {
-        viewModel.callPlayAgain()
     }
 }
