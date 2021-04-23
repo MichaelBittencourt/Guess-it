@@ -48,7 +48,6 @@ class GameFragment : Fragment() {
 
     private var localScore = 0
 
-    @SuppressLint("FragmentLiveDataObserve")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
                               savedInstanceState: Bundle?): View? {
 
@@ -75,7 +74,7 @@ class GameFragment : Fragment() {
 //            binding.wordText.text = it
 //        })
 
-        viewModel.eventGameFinished.observe(this, Observer {
+        viewModel.eventGameFinished.observe(viewLifecycleOwner, Observer {
             if (it) {
                 gameFinished()
                 viewModel.onGameFinishComplete()
@@ -84,19 +83,11 @@ class GameFragment : Fragment() {
 
 //      I've removed the currentTimer observer of it line
 
-        viewModel.currentTimer.observe(this, Observer {
-            if (it == 0L) {
-                buzz(GameViewModel.BuzzType.GAME_OVER.pattern)
-            } else if (it <= COUNT_DOWN_PANIC) {
-                buzz(GameViewModel.BuzzType.COUNTDOWN_PANIC.pattern)
+        viewModel.eventBuzz.observe(viewLifecycleOwner, Observer {buzzType ->
+            if (buzzType != GameViewModel.BuzzType.NO_BUZZ) {
+                buzz(buzzType.pattern)
+                viewModel.onBuzzComplete()
             }
-        })
-
-        viewModel.score.observe(this, Observer {
-            if (it > localScore) {
-                buzz(GameViewModel.BuzzType.CORRECT.pattern)
-            }
-            localScore = it
         })
 
         return binding.root
