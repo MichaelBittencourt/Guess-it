@@ -17,12 +17,16 @@
 package com.example.android.guesstheword.screens.game
 
 import android.annotation.SuppressLint
+import android.os.Build
 import android.os.Bundle
+import android.os.VibrationEffect
+import android.os.Vibrator
 import android.text.format.DateUtils
 import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import androidx.core.content.getSystemService
 import androidx.databinding.DataBindingUtil
 import androidx.fragment.app.Fragment
 import androidx.lifecycle.Observer
@@ -36,9 +40,13 @@ import com.example.android.guesstheword.databinding.GameFragmentBinding
  */
 class GameFragment : Fragment() {
 
+    private val COUNT_DOWN_PANIC = 10
+
     private lateinit var viewModel: GameViewModel
 
     private lateinit var binding: GameFragmentBinding
+
+    private var localScore = 0
 
     @SuppressLint("FragmentLiveDataObserve")
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?,
@@ -76,6 +84,21 @@ class GameFragment : Fragment() {
 
 //      I've removed the currentTimer observer of it line
 
+        viewModel.currentTimer.observe(this, Observer {
+            if (it == 0L) {
+                buzz(GameViewModel.BuzzType.GAME_OVER.pattern)
+            } else if (it <= COUNT_DOWN_PANIC) {
+                buzz(GameViewModel.BuzzType.COUNTDOWN_PANIC.pattern)
+            }
+        })
+
+        viewModel.score.observe(this, Observer {
+            if (it > localScore) {
+                buzz(GameViewModel.BuzzType.CORRECT.pattern)
+            }
+            localScore = it
+        })
+
         return binding.root
     }
 
@@ -85,5 +108,18 @@ class GameFragment : Fragment() {
     private fun gameFinished() {
         val action = GameFragmentDirections.actionGameToScore(viewModel.score.value ?: 0)
         findNavController(this).navigate(action)
+    }
+
+    private fun buzz(pattern: LongArray) {
+        val buzzer = activity?.getSystemService<Vibrator>()
+
+        buzzer?.let {
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O) {
+                buzzer.vibrate(VibrationEffect.createWaveform(pattern, -1))
+            } else {
+                //deprecated API 26
+                buzzer.vibrate(pattern, -1)
+            }
+        }
     }
 }
