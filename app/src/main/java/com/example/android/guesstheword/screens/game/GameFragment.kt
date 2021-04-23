@@ -56,14 +56,16 @@ class GameFragment : Fragment() {
         viewModel = ViewModelProvider(this).get(GameViewModel::class.java)
 
         binding.gameViewModel = viewModel
+        binding.lifecycleOwner = this
 
-        viewModel.score.observe(this, Observer { newValue ->
-            binding.scoreText.text = newValue.toString()
-        })
-
-        viewModel.word.observe(this, Observer {
-            binding.wordText.text = it
-        })
+//        I don't need do this because I've connect it directly view XML and viewModel
+//        viewModel.score.observe(this, Observer { newValue ->
+//            binding.scoreText.text = newValue.toString()
+//        })
+//
+//        viewModel.word.observe(this, Observer {
+//            binding.wordText.text = it
+//        })
 
         viewModel.eventGameFinished.observe(this, Observer {
             if (it) {
@@ -72,9 +74,7 @@ class GameFragment : Fragment() {
             }
         })
 
-        viewModel.currentTimer.observe(this, Observer {
-            binding.timerText.text = DateUtils.formatElapsedTime(it)
-        })
+//      I've removed the currentTimer observer of it line
 
         return binding.root
     }
